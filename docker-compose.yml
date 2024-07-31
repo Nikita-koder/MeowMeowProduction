@@ -8,6 +8,52 @@ version: "3.11"
 # Раздел, в котором будут описаны сервисы, начинается с 'services'.
 
 services:
+  supabase-db:
+    container_name: supabase-db
+    build:
+      context: supabase-db
+      dockerfile: Dockerfile
+    image: supabase/postgres:15.1.0.103
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal # prevents Realtime polling queries from appearing in logs
+      - -c
+      - ssl=on # Enable SSL
+      - -c
+      - ssl_cert_file=/var/lib/postgresql/server.crt # actual path to your server.crt
+      - -c
+      - ssl_key_file=/var/lib/postgresql/server.key # actual path to your server.key
+    restart: unless-stopped
+    # ports:
+    #     - 15432:5432
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATABASE: ${POSTGRES_DB:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    volumes:
+      # PGDATA directory is persisted between restarts
+      - supabase-db-data:/var/lib/postgresql/data
+
+  dbmate:
+    container_name: dbmate
+    build:
+      context: .
+      dockerfile: dbmate/Dockerfile
+    image: amacneil/dbmate:2.6.0
+    depends_on:
+      - supabase-db
 
   # Как уже было сказано, мы собираемся создать клиентское и серверное приложения.
   # Это означает, что нам нужно два сервиса.
@@ -23,11 +69,11 @@ services:
     # Здесь 'server/' соответствует пути к папке сервера,
     # которая содержит соответствующий Dockerfile.
     container_name: golang
-    build: 
+    build:
       context: golang
       dockerfile: Dockerfile
       args:
-      - APP_NAME=golang
+        - APP_NAME=golang
     image: golang:1.22.5
     environment:
       - DATABASE_URL
