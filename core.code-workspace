@@ -1,0 +1,31 @@
+{
+    "folders": [
+      {
+        "name": "Supabase - Migrations",
+        "path": "supabase/migrations",
+      },
+      {
+        "name": "Golang - all code",
+        "path": "golang",
+      },
+      {
+        "name": "WORKSPACE ROOT",
+        "path": ".",
+      },
+    ],
+    "extensions": {
+      "recommendations": [
+        "esbenp.prettier-vscode",
+        "golang.go",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "redhat.vscode-yaml",
+        "ms-vscode.makefile-tools",
+      ],
+    },
+    "settings": {
+      "editor.formatOnSave": true,
+    },
+  }
+  
